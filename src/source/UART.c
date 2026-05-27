@@ -25,3 +25,11 @@ void UARTPL011_GPIO_PI4_init(){
     GPIO->GPIO_PUP_PDN_CNTRL_REG0 &= ~(1ULL << 28);
     GPIO->GPIO_PUP_PDN_CNTRL_REG0 &= ~(1ULL << 30);
 }
+
+void debug(char _buffer[]){
+    int _index = 0;
+    while(_buffer[_index] != '\0'){
+        UARTPL011_module->UART_DR = _buffer[_index];
+        _index++;
+    }
+}
