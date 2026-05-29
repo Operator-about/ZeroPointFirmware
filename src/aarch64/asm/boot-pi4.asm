@@ -43,7 +43,9 @@ jump_in_kernel:
     LDR X10, =0xFE201000 //UARTPL011 - База
     LDR X11, =0xFE201018 //UARTPL011 - FR
     LDR X12, =0xFE201040 //UARTPL011 - MIS
-    LDR X13, =0xFF842000 //GIC - GICC
+    LDR X13, =0xFE201038 //UARTPL011 - IMSC
+    LDR X14, =0xFE20103C //UARTPL011 - RIS
+    LDR X15, =0xFF842000 //GIC - GICC
 
     ERET //Переход в ядро
 go_to_sleep:

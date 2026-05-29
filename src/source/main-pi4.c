@@ -17,6 +17,9 @@ int main_pi4(void){
     UARTPL011_GPIO_PI4_init();
     UARTPL011_init();
     __asm__("ISB");
+    if(UARTPL011_module->UART_RIS & (1ULL << 5)){
+        //debug("RIS - active\r\n");
+    }
     debug("UARTPL011 - +\r\n");
     
     GICv2_module.GICD = (GICDv2*)0xFF841000;
@@ -25,13 +28,14 @@ int main_pi4(void){
     GICCv2_init();
     debug("GIC - +\r\n");
 
+    // debug("========================================\r\n");
+    // debug("Info about this firmware:\r\n");
+    // debug("Firmware version: 0.0.2\r\n");
+    // debug("Name firmware: ZeroPointFirmware-Pi4\r\n");
+    // debug("Status - ok!\r\n");
+    // debug("========================================\r\n");
+    // debug("Go to kernel...\r\n");
+    __asm__("ISB");
 
-    debug("========================================\r\n");
-    debug("Info about this firmware:\r\n");
-    debug("Firmware version: 0.0.2\r\n");
-    debug("Name firmware: ZeroPointFirmware-Pi4\r\n");
-    debug("Status - ok!\r\n");
-    debug("========================================\r\n");
-    debug("Go to kernel...\r\n");
     jump_in_kernel(); //Переход к ядру
 }   

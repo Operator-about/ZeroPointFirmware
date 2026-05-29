@@ -17,7 +17,8 @@ typedef struct{
     volatile uint32_t GICD_ISENABLER[32];
     uint32_t RESERVE_3[32];
     volatile uint32_t GICD_ISPENDER[32];
-    uint32_t RESERVE_4[96];
+    volatile uint32_t GICD_ICPENDER[32];
+    uint32_t RESERVE_4[64];
     volatile uint32_t GICD_IPRIORITYR[255];
     uint32_t RESERVE_5[1];
     volatile uint32_t GICD_ITARGETSR[255];

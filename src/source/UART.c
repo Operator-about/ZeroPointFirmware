@@ -4,8 +4,8 @@ void UARTPL011_init(){
     UARTPL011_module->UART_IBRD = 26;
     UARTPL011_module->UART_FBRD = 3;
     UARTPL011_module->UART_LCR_H |= (1ULL << 4) | (3ULL << 5);
-    UARTPL011_module->UART_IFLS |= (2ULL << 0) | (2ULL << 3);
-    UARTPL011_module->UART_IMSC |= (1ULL << 4) | (1ULL << 5);
+    UARTPL011_module->UART_IFLS |= (2ULL << 0);
+    UARTPL011_module->UART_IFLS &= ~(7ULL << 3);
     UARTPL011_module->UART_CR |= (1ULL << 8) | (1ULL << 9);
     UARTPL011_module->UART_CR |= (1ULL << 0); 
 }
