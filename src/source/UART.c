@@ -1,13 +1,13 @@
 #include<UART.h>
 
 void UARTPL011_init(){
-    UARTPL011_module->UART_IBRD = 26;
-    UARTPL011_module->UART_FBRD = 3;
-    UARTPL011_module->UART_LCR_H |= (1ULL << 4) | (3ULL << 5);
-    UARTPL011_module->UART_IFLS |= (2ULL << 0);
-    UARTPL011_module->UART_IFLS &= ~(7ULL << 3);
-    UARTPL011_module->UART_CR |= (1ULL << 8) | (1ULL << 9);
-    UARTPL011_module->UART_CR |= (1ULL << 0); 
+    UARTPL011M.UARTPL011_REGISTERS->UART_IBRD = 26;
+    UARTPL011M.UARTPL011_REGISTERS->UART_FBRD = 3;
+    UARTPL011M.UARTPL011_REGISTERS->UART_LCR_H |= (1ULL << 4) | (3ULL << 5);
+    UARTPL011M.UARTPL011_REGISTERS->UART_IFLS |= (2ULL << 3);
+    UARTPL011M.UARTPL011_REGISTERS->UART_IFLS &= ~(7ULL << 0);
+    UARTPL011M.UARTPL011_REGISTERS->UART_CR |= (1ULL << 8) | (1ULL << 9);
+    UARTPL011M.UARTPL011_REGISTERS->UART_CR |= (1ULL << 0); 
 }
 
 BRD_UART calculate_BRD(int _HGZ, int _BRR){
@@ -16,20 +16,14 @@ BRD_UART calculate_BRD(int _HGZ, int _BRR){
     return _BRD_local;
 }
 
-void UARTPL011_GPIO_PI4_init(){
-    GPIO->GPFSEL1 &= ~(7ULL << 12);
-    GPIO->GPFSEL1 &= ~(7ULL << 15);
-
-    GPIO->GPFSEL1 |= (4ULL << 12);
-    GPIO->GPFSEL1 |= (4ULL << 15);
-    GPIO->GPIO_PUP_PDN_CNTRL_REG0 &= ~(1ULL << 28);
-    GPIO->GPIO_PUP_PDN_CNTRL_REG0 &= ~(1ULL << 30);
-}
-
 void debug(char _buffer[]){
+    while(UARTPL011M.UARTPL011_REGISTERS->UART_FR & (1ULL << 3)){
+        __asm__("NOP");
+    }
+    
     int _index = 0;
-    while(_buffer[_index] != '\0'){
-        UARTPL011_module->UART_DR = _buffer[_index];
+    while(!(UARTPL011M.UARTPL011_REGISTERS->UART_FR & (1ULL << 5)) && _buffer[_index] != '\0'){
+        UARTPL011M.UARTPL011_REGISTERS->UART_DR = _buffer[_index];
         _index++;
     }
 }
