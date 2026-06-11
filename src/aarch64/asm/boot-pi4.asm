@@ -47,6 +47,7 @@ jump_to_kernel:
     LDR X14, =0xFE20103C //UARTPL011 - RIS
     LDR X15, =0xFE201044 //UARTPL011 - ICR
     LDR X16, =0xFF842000 //GIC - GICC
+    LDR X17, =0xFE340000 //SD - EMMC2
 
     ERET //Переход в ядро
 go_to_sleep:

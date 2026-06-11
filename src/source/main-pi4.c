@@ -1,10 +1,12 @@
 #include<GIC.h>
 #include<UART.h>
 #include<GPIO.h>
+#include<SD.h>
 
 GICv2 GICv2M;
 GICv3 GICv3M;
 UARTPL011 UARTPL011M;
+SDR* SD_Registers;
 GPIOPI4* GPIO;
 
 extern long jump_to_kernel();
@@ -27,6 +29,11 @@ int main_pi4(void){
     GICDv2_init();
     GICCv2_init();
     debug("GIC - +\r\n");
+
+    debug("SD init stage:\r\n");
+    SD_Registers = (SDR*)0xFE340000;
+    *(volatile uint16_t*)0xFE3400FC &= ~(0x3F << 0);
+    SD_init();
 
     __asm__("ISB");
     __asm__("DSB SY");

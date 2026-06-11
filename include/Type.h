@@ -4,8 +4,15 @@
 typedef struct{
     uint32_t RESERVE_1[1];
     volatile uint32_t GPFSEL1;
-    uint32_t RESERVE_2[55];
+    volatile uint32_t GPFSEL2;
+    uint32_t RESERVE_2[1];
+    volatile uint32_t GPFSEL4;
+    volatile uint32_t GPFSEL5;
+    uint32_t RESERVE_3[52];
     volatile uint32_t GPIO_PUP_PDN_CNTRL_REG0;
+    volatile uint32_t GPIO_PUP_PDN_CNTRL_REG1;
+    volatile uint32_t GPIO_PUP_PDN_CNTRL_REG2;
+    volatile uint32_t GPIO_PUP_PDN_CNTRL_REG3;
 }GPIOPI4;
 
 typedef struct{
@@ -98,3 +105,31 @@ typedef struct{
     volatile uint32_t IBRD;
     volatile uint32_t FBRD; 
 }BRD_UART;
+
+typedef struct{
+    uint32_t RESERVE_1[2];
+    volatile uint32_t ARG_SD;
+    uint16_t RESERVE_2[1];
+    volatile uint16_t CMD_SD;
+    volatile uint32_t RESP_SD[4];
+    uint32_t RESERVE_3[1];
+    volatile uint32_t PS_SD;
+    volatile uint8_t HC_SD;
+    volatile uint8_t PWC_SD;
+    uint16_t RESERVE_4[1];
+    volatile uint16_t CC_SD;
+    uint16_t RESERVE_5[1];
+    volatile uint16_t NS_SD;
+    volatile uint16_t ERS_SD;
+    volatile uint16_t NSE_SD;
+    volatile uint16_t ERSE_SD;
+    volatile uint16_t NSIE_SD;
+    uint16_t RESERVE_6[1];
+    uint32_t RESERVE_7[1];
+    volatile uint64_t CB_SD;
+}SDR;
+
+typedef struct{
+    uint32_t Arg;
+    uint16_t CMD;
+}SDCMD;
