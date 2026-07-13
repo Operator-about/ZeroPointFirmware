@@ -2,6 +2,89 @@
 #include<stdint.h>
 
 typedef struct{
+    uint8_t RESERVE_3[8];
+    volatile uint8_t Start_LBA[4];
+    uint32_t RESERVE_4[1];
+}__attribute__((packed)) MBRP;
+
+typedef struct{
+    volatile uint8_t BootCode[440];
+    volatile uint32_t UMBRDS;
+    uint16_t RESERVE_1[1];
+    MBRP PartionRecord[4];
+    volatile uint8_t Signature[2];
+}__attribute__((packed)) MBR;
+
+typedef struct{
+    uint8_t RESERVE_1[80];
+    volatile uint32_t FATOffset;
+    volatile uint32_t FATLength;
+    volatile uint32_t ClusterHeapOffset;
+    volatile uint32_t ClusterCount;
+    volatile uint32_t FirstClusterRoot;
+    uint8_t RESERVE_2[8];
+    volatile uint8_t BytsPerSectorP;
+    volatile uint8_t SectorsPerClusterP;
+    volatile uint8_t NumberFAT;
+}__attribute__((packed))exFAT_BPB;
+
+typedef struct{
+    volatile uint8_t EntryType;
+    volatile uint8_t SecondaryCount;
+    uint16_t RESERVE_1;
+    volatile uint8_t FileAttributes[2];
+    uint8_t RESERVE_2[26];
+}__attribute__((packed))exFAT_FileDirectoryEntry;
+
+typedef struct{
+    volatile uint8_t EntryType;
+    volatile uint8_t GeneralSecondaryFlags;
+    uint8_t RESERVE_1;
+    volatile uint8_t NameLength;
+    uint8_t RESERVE_2[16];
+    volatile uint32_t FirstCluster;
+    volatile uint64_t DataLength;
+}__attribute__((packed))exFAT_StreamExtensionDirectoryEntry;
+
+typedef struct{
+    volatile uint8_t EntryType;
+    volatile uint8_t GeneralSecondaryFlags;
+    volatile uint8_t FileName[30];
+}__attribute__((packed))exFAT_FileNameDirectoryEntry;
+
+typedef struct{
+    volatile uint8_t EntryType;
+    volatile uint8_t BitmapFlags;
+    uint8_t RESERVE_2[18];
+    volatile uint32_t FirstCluster;
+    volatile uint64_t DataLength;
+}__attribute__((packed))exFAT_AllocationBitmapDirectoryEntry;
+
+typedef struct{
+    volatile uint8_t EntryType;
+    uint8_t RESERVE_1[3];
+    volatile uint32_t TableCheckSum;
+    uint8_t RESERVE_2[12];
+    volatile uint32_t FirstCluster;
+    volatile uint64_t DataLength;
+}__attribute__((packed))exFAT_UpCaseTableDirectoryEntry;
+
+typedef struct{
+    volatile uint32_t BytsPerSector;
+    volatile uint32_t SectorsPerCluster;
+    volatile uint32_t FirstClusterRoot;
+    volatile uint32_t LBA_data_regione;
+    volatile uint32_t LBA_FAT_regione;
+    volatile uint32_t ClusterHeapOffset;
+}exFAT_attribute;
+
+typedef struct{
+    uint32_t FirstCluster;
+    uint32_t DataLength;
+    uint8_t NoFATChain;
+}KernelFile;
+
+typedef struct{
     uint32_t RESERVE_1[1];
     volatile uint32_t GPFSEL1;
     volatile uint32_t GPFSEL2;
@@ -107,29 +190,32 @@ typedef struct{
 }BRD_UART;
 
 typedef struct{
-    uint32_t RESERVE_1[2];
+    uint32_t RESERVE_1[1];
+    volatile uint16_t BS_SD;
+    volatile uint16_t BC_SD;
     volatile uint32_t ARG_SD;
-    uint16_t RESERVE_2[1];
-    volatile uint16_t CMD_SD;
+    volatile uint32_t CMD_SD;
     volatile uint32_t RESP_SD[4];
-    uint32_t RESERVE_3[1];
+    volatile uint32_t BDP_SD;
     volatile uint32_t PS_SD;
     volatile uint8_t HC_SD;
     volatile uint8_t PWC_SD;
     uint16_t RESERVE_4[1];
     volatile uint16_t CC_SD;
-    uint16_t RESERVE_5[1];
+    uint8_t RESERVE_5[1];
+    volatile uint8_t SR_SD;
     volatile uint16_t NS_SD;
     volatile uint16_t ERS_SD;
     volatile uint16_t NSE_SD;
     volatile uint16_t ERSE_SD;
     volatile uint16_t NSIE_SD;
-    uint16_t RESERVE_6[1];
-    uint32_t RESERVE_7[1];
+    uint16_t RESERVE_6[2];
+    volatile uint16_t HC2_SD;
     volatile uint64_t CB_SD;
 }SDR;
 
 typedef struct{
-    uint32_t Arg;
-    uint16_t CMD;
+    volatile uint32_t Arg;
+    volatile uint32_t CMD;
 }SDCMD;
+

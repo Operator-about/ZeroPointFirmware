@@ -6,13 +6,20 @@ start_pi4:
     CMP X0, #0
     B.NE go_to_sleep
 
-    ADR X0, table_vector
+    MOV X0, XZR
+    MRS X0, SCR_EL3
+    ORR X0, X0, #(1ULL << 1)
+    MSR SCR_EL3, X0
+
+    LDR X0, =table_vector
     MSR VBAR_EL3, X0
 
     LDR X0, =EL3h_SP_bottom
     MOV SP, X0
 
-    MSR DAIFSet, #2
+    MRS X0, SCTLR_EL3
+    AND X0, X0, #~(1ULL << 1)
+    MSR SCTLR_EL3, X0
 
     B main_pi4
 
@@ -21,6 +28,9 @@ start_pi4:
 .global jump_to_kernel
 
 jump_to_kernel:
+    BR X0
+    
+
     MRS X0, SCR_EL3
     ORR X0, X0, #(1ULL << 10)
     AND X0, X0, #~(1ULL << 1)
@@ -34,9 +44,6 @@ jump_to_kernel:
     ORR X0, X0, #(1ULL << 7)
     MSR SPSR_EL3, X0
 
-    MOV X0, 0x00080000
-    MSR ELR_EL3, X0
-
     ADR X0, EL2h_SP_bottom
     MSR SP_EL2, X0
 
@@ -49,6 +56,9 @@ jump_to_kernel:
     LDR X16, =0xFF842000 //GIC - GICC
     LDR X17, =0xFE340000 //SD - EMMC2
 
+    LDR X2, =0xFE201000
+    MOV W1, 0x57
+    STR W1, [X2]
     ERET //Переход в ядро
 go_to_sleep:
     WFE

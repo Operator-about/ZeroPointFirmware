@@ -1,9 +1,12 @@
 ENTRY(start_pi4)
 
+MEMORY{
+    RAM(rwx) : ORIGIN = 0x00000000, LENGTH = 1M
+}
 
 SECTIONS{
 
-    . = 0x00000000;
+    . = ORIGIN(RAM);
 
     .text : {
         KEEP(*(.text.boot))
@@ -22,6 +25,10 @@ SECTIONS{
     .data : {
         *(.data .data.*)
     }
+
+    .kernel_buffer 0x00080000 : {
+        KEEP(*(.kernel_buffer))
+    } > RAM
 
     . = ALIGN(8);
     __bss_start = .;
