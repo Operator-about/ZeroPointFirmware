@@ -2,9 +2,6 @@ ENTRY(start_pi4)
 
 
 SECTIONS{
-
-    . = 0x00000000;
-
     .text : {
         KEEP(*(.text.boot))
         *(.text .text.*)

@@ -1,5 +1,7 @@
-.section .vectors, "ax"
+.section .vectors, "ax", %progbits
 .global table_vector
+.global IRQh_handel
+.global Synch_handel
 
 .align 11
 table_vector:
