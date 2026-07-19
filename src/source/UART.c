@@ -27,3 +27,25 @@ void debug(char _buffer[]){
         _index++;
     }
 }
+
+void debugh(uint8_t _src){
+    const char _hex_table[] = "0123456789ABCDEF";
+
+    //В данном случаи операции над _src - это индекс в массиве. Т.е. если в _src будет после операции к примеру 14 - E, то это будет считано как индекс
+    UARTPL011M.UARTPL011_REGISTERS->UART_DR = _hex_table[(_src >> 4) & 0x0F];
+    UARTPL011M.UARTPL011_REGISTERS->UART_DR = _hex_table[_src & 0x0F];
+}
+
+void debugh64(uint64_t _src){
+    for(int _index = 7; _index >= 0; _index--){
+        uint8_t _next = ((_src >> (_index * 8)) & 0xFF);
+        debugh(_next);
+    }
+}
+
+void debugh32(uint32_t _src){
+    for(int _index = 3; _index >= 0; _index--){
+        uint8_t _next = ((_src >> (_index * 8)) & 0xFF);
+        debugh(_next);
+    }
+}

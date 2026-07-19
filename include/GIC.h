@@ -7,8 +7,6 @@
 extern GICv2 GICv2M;
 extern GICv3 GICv3M;
 
-extern void IRQh_handel();
-
 void GICDv2_init();
 void GICCv2_init();
 void GICDv2_clear_interrupts();

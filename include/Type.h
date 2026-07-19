@@ -85,10 +85,10 @@ typedef struct{
 }KernelFile;
 
 typedef struct{
-    uint32_t RESERVE_1[1];
+    volatile uint32_t GPFSEL0;
     volatile uint32_t GPFSEL1;
     volatile uint32_t GPFSEL2;
-    uint32_t RESERVE_2[1];
+    volatile uint32_t GPFSEL3;
     volatile uint32_t GPFSEL4;
     volatile uint32_t GPFSEL5;
     uint32_t RESERVE_3[52];
@@ -213,6 +213,11 @@ typedef struct{
     volatile uint16_t HC2_SD;
     volatile uint64_t CB_SD;
 }SDR;
+
+typedef struct{
+    SDR* SD_Registers;
+    int GIC_ID;
+}SD;
 
 typedef struct{
     volatile uint32_t Arg;
