@@ -1,11 +1,12 @@
 #include<exFAT.h>
 
-uint8_t* Buffer;
-uint32_t* Kernel_buffer;
+Data Buffers;
 
 void exFAT_init(){
-    Kernel_buffer = (uint32_t*)KERNEL_ADDRESS;
-    Buffer = (uint8_t*)0x00040000;
+    Buffers.Kernel_buffer = (uint32_t*)KERNEL_ADDRESS;
+    Buffers.Buffer = (uint8_t*)0x00040000;
+    Buffers.Buffer_index = 0;
+    Buffers.Kernel_index = 0;
 
     read_block(0);
     MBR* _MBR;
@@ -32,35 +33,40 @@ void exFAT_init(){
     exFAT_attr.ClusterHeapOffset = _exFAT_ptr->ClusterHeapOffset;
 
     walk_FAT_table(exFAT_attr.FirstClusterRoot);
-    read_cluster(exFAT_attr.LBA_data_regione + ((exFAT_attr.FirstClusterRoot - 2) * exFAT_attr.SectorsPerCluster), 1); //Чтение Root-кластера
+    read_cluster(exFAT_attr.LBA_data_regione + ((exFAT_attr.FirstClusterRoot - 2) * exFAT_attr.SectorsPerCluster)); //Чтение Root-кластера
     KernelFile _kernel = get_first_cluster_kernel(); //Получение первого кластера ядра
     
     for(int _clear_buffer = 0; _clear_buffer < 32768; _clear_buffer++){
-       Buffer[_clear_buffer] = 0x0;
+       Buffers.Buffer[_clear_buffer] = 0x0;
     }
+    Buffers.Buffer_index = 0;
     
     if(_kernel.NoFATChain & (1ULL << 1)){
         for(int _get = 0; _get < (int)(_kernel.DataLength / (exFAT_attr.BytsPerSector * exFAT_attr.SectorsPerCluster)); _get++){
-            read_cluster(exFAT_attr.LBA_data_regione + ((_kernel.FirstCluster - 2) * exFAT_attr.SectorsPerCluster), (int)(_kernel.DataLength / (exFAT_attr.BytsPerSector * exFAT_attr.SectorsPerCluster)));
+            read_cluster(exFAT_attr.LBA_data_regione + ((_kernel.FirstCluster - 2) * exFAT_attr.SectorsPerCluster));
         }
         _kernel.FirstCluster++;
     }
+    else{
+        while(_kernel.FirstCluster != 0xFFFFFFFF){
+            read_cluster(exFAT_attr.LBA_data_regione + ((_kernel.FirstCluster - 2) * exFAT_attr.SectorsPerCluster));
+            _kernel.FirstCluster = walk_FAT_table(_kernel.FirstCluster);
+        }
+    }
 
-    to_kernel_buffer((int)(_kernel.DataLength / (exFAT_attr.BytsPerSector * exFAT_attr.SectorsPerCluster)));
+    to_kernel_buffer();
+    Buffers.Buffer_index = 0;
+    Buffers.Kernel_index = 0;
 }
 
-void read_cluster(uint32_t _cluster, int _count_cluster){
-    int _count = 0;
-
-    for(int _index_count = 0; _index_count < _count_cluster; _index_count++){
-        for(int _current_sector = 0; _current_sector < exFAT_attr.SectorsPerCluster; _current_sector++){
-            read_block(_cluster);
-            for(int _current_byte = 0; _current_byte < exFAT_attr.BytsPerSector; _current_byte++){
-                Buffer[_count] = DAT_buffer[_current_byte];
-                _count++;
-            }
-            _cluster++;
+void read_cluster(uint32_t _cluster){
+    for(int _current_sector = 0; _current_sector < exFAT_attr.SectorsPerCluster; _current_sector++){
+        read_block(_cluster);
+        for(int _current_byte = 0; _current_byte < exFAT_attr.BytsPerSector; _current_byte++){
+            Buffers.Buffer[Buffers.Buffer_index] = DAT_buffer[_current_byte];
+            Buffers.Buffer_index++;
         }
+        _cluster++;
     }
 }
 
@@ -84,7 +90,7 @@ KernelFile get_first_cluster_kernel(){
     }
 
     for(int _index = 0; _index < (int)(exFAT_attr.BytsPerSector * exFAT_attr.SectorsPerCluster); _index++){
-        _tempory_buffer[_tempory_buffer_index] = Buffer[_index]; //Сохранение значения 32 байт каждый раз
+        _tempory_buffer[_tempory_buffer_index] = Buffers.Buffer[_index]; //Сохранение значения 32 байт каждый раз
         _tempory_buffer_index++;
         if(_tempory_buffer_index == 32){
             //Проверка на файл
@@ -156,7 +162,7 @@ uint32_t walk_FAT_table(uint32_t _cluster){
     }
     
     if(_tempory_cluster >= 0xFFFFFFF8 && _tempory_cluster <= 0xFFFFFFFF){
-        return (uint32_t)1;
+        return 0xFFFFFFFF;
     }
     else if(_tempory_cluster == 0x0){
         return 0x0;
@@ -166,15 +172,15 @@ uint32_t walk_FAT_table(uint32_t _cluster){
     }
 }
 
-void to_kernel_buffer(int _multi){
+void to_kernel_buffer(){
     volatile uint32_t _tempory_value = 0x0;
     int _current8_index = 0;
 
-    for(int _current32_index = 0; _current32_index < (8912 * _multi); _current32_index++){
+    for(; Buffers.Kernel_index < (Buffers.Buffer_index / 4); Buffers.Kernel_index++){
         for(int _get = 0; _get < 4; _get++){
-            _tempory_value |= ((uint32_t)Buffer[_get + _current8_index] << (_get * 8));
+            _tempory_value |= ((uint32_t)Buffers.Buffer[_get + _current8_index] << (_get * 8));
         }
-        Kernel_buffer[_current32_index] = _tempory_value;
+        Buffers.Kernel_buffer[Buffers.Kernel_index] = _tempory_value;
         _tempory_value = 0x0;
         _current8_index+=4;
     }
