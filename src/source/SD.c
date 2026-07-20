@@ -2,16 +2,10 @@
 
 void SD_controller_init(){
     SDM.SD_Registers->SR_SD |= (1ULL << 0) | (1ULL << 1) | (1ULL << 2); //Сброс линий карт
-    SDM.SD_Registers->PWC_SD = 0x0; //Сброс питание карты
-    if(SDM.SD_Registers->CB_SD & (1ULL << 24)){
-        debug("[^]3.3v support\r\n");
-        SDM.SD_Registers->PWC_SD |= (7ULL << 1); //Установка питания карты в 3.3v
-    }
-    else if(SDM.SD_Registers->CB_SD & (1ULL << 25)){
-        debug("[^]3.0v support\r\n");
-        SDM.SD_Registers->PWC_SD |= (6ULL << 1); //Установка питания карты в 3.0v
-    }
-    debug("[+]Voltage select\r\n");
+    SDM.SD_Registers->PWC_SD &= ~(1ULL << 0);
+    SDM.SD_Registers->PWC_SD &= ~(7ULL << 1);
+    SD_sec_barrier(50);
+    SDM.SD_Registers->PWC_SD |= (7ULL << 1); //Установка питания карты в 3.3v
     SDM.SD_Registers->PWC_SD |= (1ULL << 0);
 
     SDM.SD_Registers->NSE_SD = (1ULL << 0) | (1ULL << 1) | (1ULL << 5) | (1ULL << 3) | (1ULL << 5);
@@ -52,7 +46,7 @@ void SD_card_init(){
     _CMD0.Arg = 0x0;
     _CMD0.CMD = 0x0;
     CMD_send(_CMD0);
-    SD_sec_barrier(500);
+    SD_sec_barrier(50);
 
     SDCMD _CMD8; //Базовая проверка карты
     _CMD8.Arg = 0x0;
@@ -61,7 +55,7 @@ void SD_card_init(){
     //Начинается с 16 т.к. одна часть регистра - Transmition, а другая - Command
     _CMD8.CMD |= (2ULL << 16) | (1ULL << 19) | (1ULL << 20) | (8ULL << 24); //Установка типа ответа R
     CMD_send(_CMD8);
-    SD_sec_barrier(500);
+    SD_sec_barrier(50);
 
     if(((SDM.SD_Registers->RESP_SD[0] >> 8) & 0xF) == 1){
         __asm__("NOP");
@@ -95,14 +89,14 @@ void SD_card_init(){
     _CMD2.CMD = 0x0;
     _CMD2.CMD |= (1ULL << 16) | (1ULL << 19) | (2ULL << 24);
     CMD_send(_CMD2);
-    SD_sec_barrier(500);
+    SD_sec_barrier(50);
 
     SDCMD _CMD3; //Выдача карте специального RCA адреса
     _CMD3.Arg = 0x0;
     _CMD3.CMD = 0x0;
     _CMD3.CMD |= (2ULL << 16) | (1ULL << 19) | (1ULL << 20) | (3ULL << 24);
     CMD_send(_CMD3);
-    SD_sec_barrier(500);
+    SD_sec_barrier(50);
     SD_RCA = SDM.SD_Registers->RESP_SD[0] & 0xFFFF0000; //Запись адреса 
 
     SDCMD _CMD7; //Перевод карты в режим транспортировки данных 
@@ -111,7 +105,7 @@ void SD_card_init(){
     _CMD7.CMD = 0x0;
     _CMD7.CMD |= (3ULL << 16) | (1ULL << 19) | (1ULL << 20) | (7ULL << 24);
     CMD_send(_CMD7);
-    SD_sec_barrier(500);
+    SD_sec_barrier(50);
 
     SDM.SD_Registers->SR_SD |= (1ULL << 2); //Сброс DAT линии
 

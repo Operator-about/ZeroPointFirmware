@@ -148,6 +148,13 @@ typedef struct{
 }UARTPL011;
 
 typedef struct{
+    uint8_t* Buffer;
+    uint32_t* Kernel_buffer;
+    int Buffer_index;
+    int Kernel_index;
+}Data;
+
+typedef struct{
     GICDv2* GICD;
     GICCv2* GICC;
 }GICv2;
