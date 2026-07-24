@@ -16,13 +16,15 @@ typedef struct{
 }__attribute__((packed)) MBR;
 
 typedef struct{
-    uint8_t RESERVE_1[80];
+    uint8_t RESERVE_1[3];
+    uint8_t FileSystemName[8];
+    uint8_t RESERVE_2[69];
     volatile uint32_t FATOffset;
     volatile uint32_t FATLength;
     volatile uint32_t ClusterHeapOffset;
     volatile uint32_t ClusterCount;
     volatile uint32_t FirstClusterRoot;
-    uint8_t RESERVE_2[8];
+    uint8_t RESERVE_3[8];
     volatile uint8_t BytsPerSectorP;
     volatile uint8_t SectorsPerClusterP;
     volatile uint8_t NumberFAT;
