@@ -14,6 +14,7 @@ volatile uint8_t* DAT_buffer;
 exFAT_BPB exFAT;
 exFAT_attribute exFAT_attr;
 volatile uint32_t* Kernel;
+JumpData Jump;
 
 
 extern long jump_to_kernel();
@@ -49,9 +50,17 @@ int main_pi4(void){
 
     exFAT_init();
 
-    SD_preparing();
+    Jump.UART_Standart = 0x504C00B0;
+    Jump.UART = (uint64_t)0xFE201000;
+    Jump.SD = (uint64_t)0xFE340000;
+    Jump.GICv2 = (uint64_t)0xFF842000;
+    Jump.SD_ID = 158;
+    Jump.UART_ID = 153;
 
-    __asm__("MOV X18, %0" : :"r"(SD_RCA));
+    __asm__("MOV X10, %0" : : "r"((uint64_t)&Jump));
+
+    debug("[+]Jump struct build\r\n");
+
     __asm__("MSR DAIFSet, #2");
     jump_to_kernel(); //Переход к ядру
 }   

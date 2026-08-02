@@ -7,23 +7,30 @@ void exFAT_init(){
     Buffers.Buffer = (uint8_t*)0x00040000;
     Buffers.Buffer_index = 0;
     Buffers.Kernel_index = 0;
-
-    read_block(0);
+    
     MBR* _MBR;
-    _MBR->PartionRecord[0].Start_LBA[0] = 0x0;
-    _MBR->PartionRecord[1].Start_LBA[0] = 0x0;
-    _MBR = (MBR*)DAT_buffer;
-
     volatile uint32_t _LBA = 0x0;
     exFAT_BPB* _exFAT_ptr;
-    if(_MBR->PartionRecord[1].Start_LBA != 0x0){
-        for(int _build_LBA = 0; _build_LBA < 4; _build_LBA++){
-            _LBA |= ((uint32_t)_MBR->PartionRecord[1].Start_LBA[_build_LBA] << (8 * _build_LBA)); //Сборка первого абсолютного сектора exFAT
+    int _partion_index = 0;
+    uint8_t _buffer_name[8];
+    while(_partion_index < 4){
+        read_block(0);
+        _MBR = (MBR*)DAT_buffer;
+        for(int _build = 0; _build < 4; _build++){
+            _LBA |= ((uint32_t)_MBR->PartionRecord[_partion_index].Start_LBA[_build] << (8 * _build));
         }
-    }
+        read_block(_LBA);
+        _exFAT_ptr = (exFAT_BPB*)DAT_buffer;
 
-    read_block(_LBA);
-    _exFAT_ptr = (exFAT_BPB*)DAT_buffer;
+        if(compare_ZeroPoint(_exFAT_ptr->FileSystemName, "EXFAT   ") == 1){
+            debug("[^]Search exFAT done\r\n");
+            break;
+        }
+        
+        _partion_index++;
+        _LBA = 0x0;
+        debug("[^]Check\r\n");
+    }
     
     exFAT_attr.BytsPerSector = power_two(_exFAT_ptr->BytsPerSectorP);
     exFAT_attr.SectorsPerCluster = power_two(_exFAT_ptr->SectorsPerClusterP);
