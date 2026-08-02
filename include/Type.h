@@ -233,3 +233,12 @@ typedef struct{
     volatile uint32_t CMD;
 }SDCMD;
 
+typedef struct{
+    volatile uint64_t SD;
+    volatile uint64_t GICv2;
+    volatile uint64_t UART;
+    uint32_t UART_Standart;
+    int UART_ID;
+    int SD_ID;
+}JumpData;
+

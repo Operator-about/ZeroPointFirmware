@@ -8,9 +8,8 @@ void SD_controller_init(){
     SDM.SD_Registers->PWC_SD |= (7ULL << 1); //Установка питания карты в 3.3v
     SDM.SD_Registers->PWC_SD |= (1ULL << 0);
 
-    SDM.SD_Registers->NSE_SD = (1ULL << 0) | (1ULL << 1) | (1ULL << 5) | (1ULL << 3) | (1ULL << 5);
-    SDM.SD_Registers->ERSE_SD = (1ULL << 0) | (1ULL << 1) | (1ULL << 2) | (1ULL << 3) | (1ULL << 4) | (1ULL << 5);
-    SDM.SD_Registers->NSIE_SD = (1ULL << 5);
+    SDM.SD_Registers->NSE_SD = (1ULL << 5) | (1ULL << 4);
+    SDM.SD_Registers->NSIE_SD = (1ULL << 5) | (1ULL << 4);
 
     SDM.SD_Registers->CC_SD &= ~(1ULL << 0);
     SDM.SD_Registers->CC_SD &= ~(1ULL << 0);
