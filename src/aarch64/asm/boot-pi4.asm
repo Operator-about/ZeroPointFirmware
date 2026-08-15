@@ -12,6 +12,10 @@ start_pi4:
     LDR X0, =EL3h_SP_bottom
     MOV SP, X0
 
+    MRS X0, CPTR_EL3
+    AND X0, X0, #~(1ULL << 10)
+    MSR CPTR_EL3, X0
+
     B main_pi4
 
 .section .text

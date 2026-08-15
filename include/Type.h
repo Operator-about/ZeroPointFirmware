@@ -2,9 +2,9 @@
 #include<stdint.h>
 
 typedef struct{
-    uint8_t RESERVE_3[8];
+    uint64_t RESERVE_3;
     volatile uint8_t Start_LBA[4];
-    uint32_t RESERVE_4[1];
+    uint32_t RESERVE_4;
 }__attribute__((packed)) MBRP;
 
 typedef struct{
@@ -17,7 +17,7 @@ typedef struct{
 
 typedef struct{
     uint8_t RESERVE_1[3];
-    uint8_t FileSystemName[8];
+    volatile uint8_t FileSystemName[8];
     uint8_t RESERVE_2[69];
     volatile uint32_t FATOffset;
     volatile uint32_t FATLength;
@@ -28,7 +28,7 @@ typedef struct{
     volatile uint8_t BytsPerSectorP;
     volatile uint8_t SectorsPerClusterP;
     volatile uint8_t NumberFAT;
-}__attribute__((packed))exFAT_BPB;
+}__attribute__((packed))exFAT;
 
 typedef struct{
     volatile uint8_t EntryType;
@@ -41,9 +41,7 @@ typedef struct{
 typedef struct{
     volatile uint8_t EntryType;
     volatile uint8_t GeneralSecondaryFlags;
-    uint8_t RESERVE_1;
-    volatile uint8_t NameLength;
-    uint8_t RESERVE_2[16];
+    uint8_t RESERVE_2[18];
     volatile uint32_t FirstCluster;
     volatile uint64_t DataLength;
 }__attribute__((packed))exFAT_StreamExtensionDirectoryEntry;
@@ -55,36 +53,20 @@ typedef struct{
 }__attribute__((packed))exFAT_FileNameDirectoryEntry;
 
 typedef struct{
-    volatile uint8_t EntryType;
-    volatile uint8_t BitmapFlags;
-    uint8_t RESERVE_2[18];
-    volatile uint32_t FirstCluster;
-    volatile uint64_t DataLength;
-}__attribute__((packed))exFAT_AllocationBitmapDirectoryEntry;
-
-typedef struct{
-    volatile uint8_t EntryType;
-    uint8_t RESERVE_1[3];
-    volatile uint32_t TableCheckSum;
-    uint8_t RESERVE_2[12];
-    volatile uint32_t FirstCluster;
-    volatile uint64_t DataLength;
-}__attribute__((packed))exFAT_UpCaseTableDirectoryEntry;
-
-typedef struct{
     volatile uint32_t BytsPerSector;
     volatile uint32_t SectorsPerCluster;
     volatile uint32_t FirstClusterRoot;
     volatile uint32_t LBA_data_regione;
     volatile uint32_t LBA_FAT_regione;
     volatile uint32_t ClusterHeapOffset;
-}exFAT_attribute;
+}__attribute__((packed)) exFAT_attribute;
 
 typedef struct{
-    uint32_t FirstCluster;
-    uint32_t DataLength;
-    uint8_t NoFATChain;
-}KernelFile;
+    volatile uint32_t FirstCluster;
+    volatile uint64_t DataLength;
+    volatile uint8_t Name[30];
+    volatile uint8_t NoFATChain;
+}DataKernel;
 
 typedef struct{
     volatile uint32_t GPFSEL0;
@@ -98,35 +80,8 @@ typedef struct{
     volatile uint32_t GPIO_PUP_PDN_CNTRL_REG1;
     volatile uint32_t GPIO_PUP_PDN_CNTRL_REG2;
     volatile uint32_t GPIO_PUP_PDN_CNTRL_REG3;
-}GPIOPI4;
+}__attribute__((packed)) GPIOPI4;
 
-typedef struct{
-    volatile uint32_t GICD_CTLR;
-    volatile uint32_t GICD_TYPER;
-    volatile uint32_t GICD_IIDR;
-    uint32_t RESERVE_1[29];
-    volatile uint32_t GICD_IGROUPER[32];
-    volatile uint32_t GICD_ISENABLER[32];
-    volatile uint32_t GICD_ICENABLER[32];
-    volatile uint32_t GICD_ISPENDER[32];
-    volatile uint32_t GICD_ICPENDER[32];
-    uint32_t RESERVE_4[64];
-    volatile uint32_t GICD_IPRIORITYR[255];
-    uint32_t RESERVE_5[1];
-    volatile uint32_t GICD_ITARGETSR[255];
-    uint32_t RESERVE_6[1];
-    volatile uint32_t GICD_ICFGR[64];
-}GICDv2;
-
-typedef struct{
-    volatile uint32_t GICC_CTLR;
-    volatile uint32_t GICC_PMR;
-    uint32_t RESERVE_1[1];
-    volatile uint32_t GICC_IAR;
-    volatile uint32_t GICC_EOIR;
-    uint32_t RESERVE_2[1019];
-    volatile uint32_t GICC_DIR;
-}GICCv2;
 
 typedef struct{
     volatile uint32_t UART_DR; 
@@ -142,24 +97,28 @@ typedef struct{
     volatile uint32_t UART_RIS; 
     volatile uint32_t UART_MIS;
     volatile uint32_t UART_ICR;
-}UARTPL011R;
+}__attribute__((packed)) UARTPL011R;
 
 typedef struct{
     UARTPL011R* UARTPL011_REGISTERS;
     int GIC_ID;
-}UARTPL011;
+}__attribute__((packed)) UARTPL011;
 
 typedef struct{
-    uint8_t* Buffer;
-    uint32_t* Kernel_buffer;
-    int Buffer_index;
-    int Kernel_index;
+    uint8_t Buffer[32768];
+    int BufferIndex;
+    int BufferCurrentIndex;
 }Data;
 
 typedef struct{
-    GICDv2* GICD;
-    GICCv2* GICC;
-}GICv2;
+    volatile uint32_t GICC_CTLR;
+    volatile uint32_t GICC_PMR;
+    uint32_t RESERVE_1[1];
+    volatile uint32_t GICC_IAR;
+    volatile uint32_t GICC_EOIR;
+    uint32_t RESERVE_2[1019];
+    volatile uint32_t GICC_DIR;
+}__attribute__((packed)) GICC;
 
 typedef struct{
     volatile uint32_t GICD_CTLR;
@@ -170,14 +129,17 @@ typedef struct{
     volatile uint32_t GICD_ISENABLER[32];
     volatile uint32_t GICD_ICENABLER[32];
     volatile uint32_t GICD_ISPENDER[32];
-    uint32_t RESERVE_3[96];
-    volatile uint32_t GICD_IPRIORITYR[256];
-    uint32_t RESERVE_4[256];
+    volatile uint32_t GICD_ICPENDER[32];
+    uint32_t RESERVE_2[64];
+    volatile uint32_t GICD_IPRIORITYR[255];
+    uint32_t RESERVE_3[1];
+    volatile uint32_t GICD_ITARGETSR[255];
+    uint32_t RESERVE_4[1];
     volatile uint32_t GICD_ICFGR[64];
     volatile uint32_t GICD_IGRPMODR[64];
     uint32_t RESERVE_5[6152];
     volatile uint64_t GICD_IROUTER[1019];
-}GICDv3;
+}__attribute__((packed)) GICD;
 
 typedef struct{
     volatile uint32_t GICR_CTLR;
@@ -185,18 +147,20 @@ typedef struct{
     volatile uint32_t GICR_TYPER;
     uint32_t RESERVE_1[1];
     volatile uint32_t GICR_WAKER;
-}GICRv3;
+}__attribute__((packed)) GICR;
 
 typedef struct{
-    GICDv3* GICDR;
-    GICRv3* GICRR;
+    GICD* GICDR;
+    GICR* GICRR;
+    GICC* GICCR;
     volatile uint64_t AFE[4];
-}GICv3;
+    int Mode;
+}__attribute__((packed)) GIC;
 
 typedef struct{
     volatile uint32_t IBRD;
     volatile uint32_t FBRD; 
-}BRD_UART;
+}__attribute__((packed)) BRD_UART;
 
 typedef struct{
     uint32_t RESERVE_1[1];
@@ -221,24 +185,83 @@ typedef struct{
     uint16_t RESERVE_6[2];
     volatile uint16_t HC2_SD;
     volatile uint64_t CB_SD;
-}SDR;
+}__attribute__((packed)) SDAR;
 
 typedef struct{
-    SDR* SD_Registers;
+    SDAR* SDAMR;
     int GIC_ID;
-}SD;
+}__attribute__((packed)) SDA;
+
+typedef struct{
+    volatile uint32_t CTLR_SD;
+    volatile uint32_t PWC_SD;
+    volatile uint32_t CLKDIV_SD;
+    volatile uint32_t CLKS_SD;
+    volatile uint32_t CLKE_SD;
+    volatile uint32_t TIME_SD;
+    uint32_t RESERVE_1[1];
+    volatile uint32_t BS_SD;
+    volatile uint32_t BC_SD;
+    volatile uint32_t IM_SD;
+    volatile uint32_t ARG_SD;
+    volatile uint32_t CMD_SD;
+    volatile uint32_t RESP_SD[4];
+    volatile uint32_t IMS_SD;
+    uint32_t RESERVE_2[111];
+    volatile uint32_t BDP_SD;
+}__attribute__((packed)) SDRRock;
 
 typedef struct{
     volatile uint32_t Arg;
     volatile uint32_t CMD;
-}SDCMD;
+}__attribute__((packed)) SDCMD;
 
 typedef struct{
     volatile uint64_t SD;
     volatile uint64_t GICv2;
     volatile uint64_t UART;
     uint32_t UART_Standart;
+    uint32_t SD_Standart;
     int UART_ID;
     int SD_ID;
-}JumpData;
+}__attribute__((packed)) JumpData;
 
+typedef struct{
+    volatile uint32_t CRU_LPPL_CON[6];
+    volatile uint32_t CRU_BPPL_CON[6];
+    volatile uint32_t CRU_DPPL_CON[6];
+    volatile uint32_t CRU_CPPL_CON[6];
+    volatile uint32_t CRU_GPPL_CON[6];
+    volatile uint32_t CRU_NPPL_CON[6];
+    volatile uint32_t CRU_VPPL_CON[6];
+    uint32_t RESERVE_1[10];
+    volatile uint32_t CRU_CLKSEL_CON[108];
+    uint32_t RESERVE_2[20];
+    volatile uint32_t CRU_CLKGATE_CON[35];
+}__attribute__((packed)) CRU;
+
+typedef struct{
+    volatile uint32_t UART_TRD;
+    volatile uint32_t UART_DEI;
+    volatile uint32_t UART_IIF;
+    volatile uint32_t UART_LCR;
+    volatile uint32_t UART_MCR;
+    volatile uint32_t UART_LSR;
+    uint32_t RESERVE_1[22];
+    volatile uint32_t UART_FAR;
+}__attribute__((packed)) UART165050;
+
+typedef struct{
+    uint32_t RESERVE_1[14335];
+    volatile uint32_t GRF_GPIO2_IOMUX[4];
+    volatile uint32_t GRF_GPIO3_IOMUX[4];
+    volatile uint32_t GRF_GPIO4_IOMUX[4];
+    uint32_t RESERVE_2[4];
+    volatile uint32_t GRF_GPIO2_PULL[4];
+    volatile uint32_t GRF_GPIO3_PULL[4];
+    volatile uint32_t GRF_GPIO4_PULL[4];
+    uint32_t RESERVE_3[4];
+    volatile uint32_t GRF_GPIO2_SR[4];
+    volatile uint32_t GRF_GPIO3_SR[4];
+    volatile uint32_t GRF_GPIO4_SR[4];
+}__attribute__((packed)) GRF;

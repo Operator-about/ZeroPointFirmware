@@ -1,23 +1,18 @@
 #include<GIC.h>
-#include<UART.h>
+#include<PL011.h>
 #include<GPIO.h>
+#include<SD-Standart.h>
 #include<SD.h>
-#include<exFAT.h>
+#include<MBR.h>
+#include<exFAT-PhysicalLayer.h>
+#include<exFAT-KernelLayer.h>
 
-GICv2 GICv2M;
-GICv3 GICv3M;
-UARTPL011 UARTPL011M;
-SD SDM;
-GPIOPI4* GPIO;
-uint32_t SD_RCA;
-volatile uint8_t* DAT_buffer;
-exFAT_BPB exFAT;
-exFAT_attribute exFAT_attr;
-volatile uint32_t* Kernel;
 JumpData Jump;
 
-
 extern long jump_to_kernel();
+
+int GICSD_ID;
+int GICUART_ID;
 
 int main_pi4(void){
     GPIO = (GPIOPI4*)0xFE200000;
@@ -26,31 +21,33 @@ int main_pi4(void){
     UARTPL011M.UARTPL011_REGISTERS->UART_DR &= ~(1ULL << 0);
     UARTPL011M.UARTPL011_REGISTERS->UART_DR &= ~(1ULL << 9);
     UARTPL011M.UARTPL011_REGISTERS->UART_DR &= ~(1ULL << 8);
-    UARTPL011M.GIC_ID = 153;
+    GICUART_ID = 153;
     UARTPL011_GPIO_PI4_init();
-    UARTPL011_init();
+    UARTPL011_init(UARTPL011_calculate_DR(48000000, 115200));
     __asm__("ISB");
     debug("[+]UARTPL011 - +\r\n");
 
-    SDM.GIC_ID = 158;
-    GICv2M.GICD = (GICDv2*)0xFF841000;
-    GICv2M.GICC = (GICCv2*)0xFF842000;
-    GICDv2_clear_interrupts();
-    GICDv2_init();
-    GICCv2_init();
+    GICSD_ID = 158;
+    GICM.GICDR = (GICD*)0xFF841000;
+    GICM.GICCR = (GICC*)0xFF842000;
+    GICM.Mode = 2;
+    GICD_init();
+    GICC_init();
     debug("[+]GIC - +\r\n");
 
-    debug("[+]SD init stage\r\n");
-    SDM.SD_Registers = (SDR*)0xFE340000;
-    SD_controller_init();
+    SDAM.SDAMR = (SDAR*)0xFE340000;
+    SD_Standart = (uint32_t)0x5354414E;
+    SDA_controller_init();
     SD_card_init();
-    debug("[+]SD init stage done\r\n");
 
-    __asm__("MSR DAIFClr, #2");
-
+    MBR_init();
+    LBA_for_exFAT();
     exFAT_init();
+    
+    search_kernel();
 
     Jump.UART_Standart = 0x504C00B0;
+    Jump.SD_Standart = 0x5354414E;
     Jump.UART = (uint64_t)0xFE201000;
     Jump.SD = (uint64_t)0xFE340000;
     Jump.GICv2 = (uint64_t)0xFF842000;

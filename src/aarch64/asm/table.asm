@@ -1,7 +1,7 @@
 .section .vectors, "ax", %progbits
 .global table_vector
 .global IRQh_handel
-.global Synch_handel
+.global Sync
 
 .align 11
 table_vector:
@@ -18,7 +18,7 @@ table_vector:
         ERET
     .align 7
     synchronous_elxh:
-        ERET
+        BL Sync
     .align 7
     irq_handel_elxh:
         ERET

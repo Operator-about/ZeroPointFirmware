@@ -4,15 +4,14 @@
 #include<UART.h>
 #include<SD.h>
 
-extern GICv2 GICv2M;
-extern GICv3 GICv3M;
+extern GIC GICM;
 
-void GICDv2_init();
-void GICCv2_init();
-void GICDv2_clear_interrupts();
-
-void GICDv3_init();
-void GICRv3_init();
-void GICCv3_init();
-void GICDv3_clear_interrupts();
+void switch_GICv2_to_GICv3();
+void GICD_init();
+void GICR_init();
+void GICC_init();
 void GICDv3_IROUTER_AFE();
+
+void IRQ_set(int _index);
+
+extern void Sync();

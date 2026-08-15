@@ -1,40 +1,32 @@
-ENTRY(start_q)
-
-MEMORY{
-    RAM(rwx) : ORIGIN = 0x00000000, LENGTH = 4096M
-}
-
+ENTRY(start_virt)
 
 SECTIONS{
-
-    . = ORIGIN(RAM);
+    . = 0x00900000
 
     .text : {
         KEEP(*(.text.boot))
         *(.text .text.*)
-    } > RAM
+    }
 
     . = ALIGN(2048);
     .vectors : {
         KEEP(*(.vectors))
-    } > RAM
+    }
 
     .rodata : {
         *(.rodata .rodata.*)
-    } > RAM
+    }
 
     .data : {
-        . = ALIGN(8);
         *(.data .data.*)
-    } > RAM
+    }
 
-    . = ALIGN(16);
+    . = ALIGN(8);
     __bss_start = .;
     .bss : {
-        *(bss. .bss.*)
+        *(.bss .bss.*)
         *(COMMON)
-    } > RAM
-    . = ALIGN(16);
+    }
     __bss_end = .;
 
     __end = .;
